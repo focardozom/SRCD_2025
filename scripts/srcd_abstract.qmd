@@ -135,3 +135,42 @@ print(reliability)
 
 ```
 
+```{r create-excel-collaborators-check}  
+
+# Create a list of all the data frames
+all_tables <- list(
+  Impulsivity = impulsivity,
+  Anxiety = anxiety,
+  Depression = depression,
+  Happiness = happiness,
+  Optimism = optimism,
+  Connectedness = connectedness,
+  Engagement = engagement,
+  Perseverance = perserverance,
+  Social_Skills = social_skills,
+  Substance_Use_Tobacco = substance_use_tab,
+  Substance_Use_Marijuana = substance_use_mar,
+  Substance_Use_Illicit = substance_use_ill,
+  Substance_Use_Prescription = substance_use_pres
+)
+
+# Install and load the openxlsx package if not already installed
+if (!requireNamespace("openxlsx", quietly = TRUE)) {
+  install.packages("openxlsx")
+}
+library(openxlsx)
+
+# Create a new workbook
+wb <- createWorkbook()
+
+# Add each data frame as a separate worksheet
+for (name in names(all_tables)) {
+  addWorksheet(wb, name)
+  writeData(wb, name, all_tables[[name]])
+}
+
+# Save the workbook
+output_file <- "combined_results.xlsx"
+saveWorkbook(wb, output_file, overwrite = TRUE)
+
+```

@@ -1,0 +1,16 @@
+Taks:
+1. Recode variables and prepare data for models. 
+2. Create a function to run models and save results. 
+
+Questions: 
+1. We are doing a network analysis of behaviors. We should compare network structures  
+    by race/ethnicity
+    by gender
+    by age
+
+Define a good method of comparison. Be careful of using centrality measures because of network of correlations. 
+Stablish criteria for dichotomizing the network and compare structures. 
+Criteria can be based on: 
+- Median, 25th percentile, and 75th percentile.
+- All possible values (as tree methods) and sensitivity analysis.
+

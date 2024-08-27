@@ -1,0 +1,5 @@
+
+cfa_model_social_skills  <- '
+  social_skills =~ k6d1a + k6d1b + k6d1c + k6d1d + k6d1e + k6d1f + k6d1g + k6d1h + k6d1i + k6d1j + k6d1k + k6d1l
+'
+

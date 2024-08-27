@@ -1,0 +1,137 @@
+
+
+# Read Data
+
+```{r load-data}
+
+source("scripts/functions.R")
+
+if (!require("pak")) install.packages("pak")
+pak::pak(c("bulkreadr", "duckplyr"))
+
+library(here)
+library(bulkreadr)
+library(duckplyr)
+
+the_data <- read_spss_data("data/FF_allwaves_2020v2_SPSS.sav") |> 
+ duckplyr::as_duckplyr_tibble()
+
+```
+
+```{r psychosocial-wellbeing}
+# Psychosocial well-being ---------------------------------
+
+## Delinquency  ----
+
+delinquency <- time_table("delinquency", "k")
+ 
+## Impulsivity  ----
+
+impulsivity <- time_table("Impulsivity", "k")
+
+## Anxiety  ----
+
+anxiety <- time_table("BSI/anxiety", "k")
+
+## Depression  ----
+
+depression <- time_table("CES-D/depression", "k")
+
+## EPOCH
+
+## Happiness  ----
+
+happiness <- time_table("EPOCH/Happiness", "k")
+
+## Optimism  ----
+
+optimism <- time_table("EPOCH/Optimism", "k")
+
+## Connectedness  ----
+
+connectedness <- time_table("EPOCH/Connectedness", "k")
+
+## Engagement  ----
+
+engagement <- time_table("EPOCH/engagement", "k")
+
+## Perseverance  ----
+
+perserverance <- time_table("EPOCH/Perserverance", "k")
+
+## Social skills  ----
+
+social_skills <- time_table("social skills", "k")
+
+## Substance use  ----
+
+substance_use_tab <- time_table("substance use (tobacco)", "k")
+
+substance_use_mar <- time_table("substance use (marijuana)", "k")
+
+substance_use_ill <- time_table("substance use (illicit)", "k")
+
+substance_use_pres <- time_table("substance use (prescr)", "k")
+
+```
+
+# building... 
+```{r}  
+test  <- function(x, y, z){
+  
+  vars <- select_variables(x, y)
+  
+  table <- the_data |> 
+    select(idnum, all_of(vars)) |> 
+    select(idnum,starts_with(y)) |> 
+    arrange(idnum) |> 
+    pivot_longer(-idnum, values_transform = as.character) |>
+    mutate(name=str_replace_all(name, dic_match1)) |> # match1 
+    mutate(name=str_replace_all(name, dic_match2)) |> # match2
+    mutate(number= str_extract(value, "-?\\d+")) |> 
+    mutate(wave = str_extract(name, "(?<=^.).")) |> 
+    filter(number >= 0) |>  #keep the number 0
+    pivot_wider(id_cols = c(idnum), 
+                values_from = number, 
+                names_from = name) |> 
+    mutate(across(-idnum, ~case_when(is.na(.x) ~ "999999", TRUE ~ .x))) |> 
+    mutate(across(where(is.character), ~as.numeric(.x)))
+
+    return(table)
+}
+
+
+t  <- test("social skills","k", "Psychosocial")
+
+view(t)
+names(t)
+
+# Create CFA model for social skills factor score
+library(lavaan)
+
+# Define the CFA model
+cfa_model_social_skills  <- '
+  social_skills =~ k6d1a + k6d1b + k6d1c + k6d1d + k6d1e + k6d1f + k6d1g + k6d1h + k6d1i + k6d1j + k6d1k + k6d1l
+'
+
+# Fit the CFA model
+cfa_fit <- cfa(cfa_model_social_skills, data = t, ordered = TRUE)
+
+# Summarize the model
+summary(cfa_fit, fit.measures = TRUE, standardized = TRUE)
+
+# Extract factor scores
+factor_scores <- lavPredict(cfa_fit)
+
+# Add factor scores to the original dataset
+t_with_scores <- cbind(t, social_skills_factor = factor_scores)
+
+# View the first few rows of the updated dataset
+head(t_with_scores)
+
+# Optional: Reliability analysis
+reliability <- semTools::reliability(cfa_fit)
+print(reliability)
+
+```
+

@@ -1,8 +1,11 @@
 # Packages
 
-library(tidyverse)
-library(here)
-library(gtsummary)
+# List of required packages
+required_packages <- c("tidyverse", "here", "gtsummary")
+
+# Check and install packages if not already installed
+if (!require("pak")) install.packages("pak")
+pak::pak(required_packages)
 
 # Files
 
